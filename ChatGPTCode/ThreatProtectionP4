@@ -1,0 +1,70 @@
+//##############################################################################################################################################
+//Rate Limiting: Implement rate limiting to control the number of packets or requests a network device can handle within a specific time frame. 
+//##############################################################################################################################################
+// Example rate limiting in P4
+control RateLimit{
+    apply {
+        if (valid(ipv4)) {
+            if (token_bucket_not_empty()) {
+                // Process the packet
+                apply(valid_actions);
+            } else {
+                // Drop the packet or take other appropriate action
+                apply(drop_action);
+            }
+        }
+    }
+}
+
+//##############################################################################################################################################
+//Flow Monitoring and Detection: Monitor the network for unusual patterns in traffic and implement mechanisms to detect and mitigate abnormal flow behavior.
+//##############################################################################################################################################
+// Example flow monitoring in P4
+control FlowMonitor {
+    apply {
+        if (valid(ipv4)) {
+            // Update flow statistics
+            update_flow_stats();
+            
+            // If flow exceeds threshold, take action
+            if (flow_exceeds_threshold()) {
+                apply(drop_action);
+            } else {
+                apply(valid_actions);
+            }
+        }
+    }
+}
+//##############################################################################################################################################
+//Blacklisting or Whitelisting:
+//##############################################################################################################################################
+// Example blacklisting in P4
+control Blacklist {
+    apply {
+        if (valid(ipv4)) {
+            if (ip_is_blacklisted()) {
+                // Drop the packet or take other appropriate action
+                apply(drop_action);
+            } else {
+                apply(valid_actions);
+            }
+        }
+    }
+}
+
+//##############################################################################################################################################
+//Packet Filtering: Implement packet filtering rules to drop packets that match certain criteria associated with DoS attacks.
+//##############################################################################################################################################
+// Example packet filtering in P4
+control PacketFilter {
+    apply {
+        if (valid(ipv4)) {
+            if (packet_matches_filter()) {
+                // Drop the packet or take other appropriate action
+                apply(drop_action);
+            } else {
+                apply(valid_actions);
+            }
+        }
+    }
+}
