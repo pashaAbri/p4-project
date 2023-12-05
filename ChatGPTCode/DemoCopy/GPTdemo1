@@ -1,0 +1,115 @@
+/*
+ * THIS CODE WAS GENERATED WITH CHAT GPT FOR THE PURPOSE OF THIS PROJECT
+ */
+
+//Prompt to get it: can you generate a basic P4_14 program for processing incoming IPv4 packets with Ethernet framing. 
+//It includes parsing, header modifications, table lookups, and actions to handle forwarding decisions
+
+/*
+ * Basic P4_14 program for processing incoming IPv4 packets with Ethernet framing.
+ */
+
+#include <core.p4>
+
+// ^ core.p4 is a temporary library - we can switch it out for one, and ask it to regenerate 
+
+/*
+ * Ethernet header definition.
+ */
+header ethernet_t {
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
+}
+
+/*
+ * IPv4 header definition.
+ */
+header ipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  dscp;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
+/*
+ * Parser definition.
+ */
+parser parse_ethernet {
+    extract(ethernet_t);
+
+    if (ethernet_t.etherType == 0x0800) {
+        parse_ipv4;
+    }
+}
+
+parser parse_ipv4 {
+    extract(ipv4_t);
+
+    // You can add additional parsing logic here if needed.
+}
+
+/*
+ * Ingress control definition.
+ */
+control ingress {
+    // Define tables for forwarding decisions.
+    table ipv4_lpm {
+        key = {
+            ipv4_t.dstAddr: lpm;
+        }
+        actions = {
+            ipv4_forward;
+            // Add more actions if needed.
+        }
+        size = 1024; // Adjust the size based on your requirements.
+    }
+
+    // Apply parsing logic.
+    apply {
+        parse_ethernet;
+        // Add more parsing logic if needed.
+    }
+
+    // Apply forwarding decisions.
+    apply {
+        if (valid(ipv4_t)) {
+            ipv4_lpm.apply();
+        }
+    }
+}
+
+/*
+ * Action definition for forwarding IPv4 packets.
+ */
+action ipv4_forward {
+    // Implement forwarding logic here.
+    // You can modify headers, update statistics, etc.
+    // Example: send to port 1
+    standard_metadata.egress_spec = 1;
+    // Add more forwarding logic if needed.
+    // You can also perform header modifications here.
+    modify_field(ipv4_t.ttl, ipv4_t.ttl - 1);
+    // You can add more header modifications based on your requirements.
+    // Egress port is set in the standard_metadata.egress_spec field.
+    // Example: egress_port_1.apply();
+    // Example: egress_port_2.apply();
+}
+
+/*
+ * Egress control definition.
+ */
+control egress {
+    // Define egress port-specific logic here.
+    // Example:
+    // egress_port_1: egress_port_1.apply();
+    // egress_port_2: egress_port_2.apply();
+}

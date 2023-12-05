@@ -1,0 +1,114 @@
+/*
+ * THIS CODE WAS GENERATED WITH CHAT GPT FOR THE PURPOSE OF THIS PROJECT
+ */
+
+//Prompt to get it: can you write simple P4 program for a basic IPv4 switch with unicast and multicast forwarding logic.
+// Define the P4 version
+@switch 1
+
+// Import the necessary headers
+#include <core.p4>
+#include <v1model.p4>
+
+// Define the basic switch architecture
+header ethernet_t {
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
+}
+
+header ipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
+// Define the parser to extract headers
+parser MyParser(packet_in packet, out headers hdr, inout metadata meta) {
+    state start {
+        packet.extract(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            0x0800: parse_ipv4;
+            default: accept;
+        }
+    }
+
+    state parse_ipv4 {
+        packet.extract(hdr.ipv4);
+        transition accept;
+    }
+}
+
+// Define the ingress pipeline
+control MyIngress(inout headers hdr, inout metadata meta) {
+    apply {
+        // Unicast Forwarding
+        if (hdr.ipv4.dstAddr == 0x0a000001) {  // Example: Forward to 10.0.0.1
+            // Forward to port 1
+            meta.port = 1;
+            standard_metadata.egress_spec = meta.port;
+            apply {
+                // Update any other necessary fields
+                // ...
+            }
+        }
+        
+        // Multicast Forwarding (Example: IP address in the range 224.0.0.0 to 224.0.0.255)
+        else if (hdr.ipv4.dstAddr[28:24] == 0xE) {
+            // Forward to multicast group
+            meta.multicast_group = 1;  // Example: Multicast group ID 1
+            apply {
+                // Update any other necessary fields
+                // ...
+            }
+        }
+        
+        // Default: Drop the packet
+        else {
+            drop();
+        }
+    }
+}
+
+// Define the egress pipeline
+control MyEgress(inout headers hdr, inout metadata meta) {
+    apply {
+        // Unicast Forwarding
+        if (meta.port != 0) {
+            // Forward to specified egress port
+            standard_metadata.egress_spec = meta.port;
+        }
+        
+        // Multicast Forwarding
+        else if (meta.multicast_group != 0) {
+            // Forward to multicast group
+            // Update any necessary fields for multicast forwarding
+            // ...
+        }
+        
+        // Default: Drop the packet
+        else {
+            drop();
+        }
+    }
+}
+
+// Define the control program
+control MyControl(inout headers hdr, inout metadata meta) {
+    apply {
+        MyIngress(hdr, meta);
+        MyEgress(hdr, meta);
+    }
+}
+
+// Define the main control block
+V1Switch(MyParser(), MyControl());
