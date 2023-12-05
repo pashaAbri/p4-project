@@ -1,11 +1,23 @@
 # P4 Project
 
-# Outline
+# High-Level Outline
 
-## 1. P4-Guide Repositories
-## 2. ...
+#### 1. Running and Analyzing Demo Programs:
+Start with the demo programs in the jafingerhut/p4-guide repository to understand standard P4 code practices.
 
-# Utilizing P4-Guide Repositories
+#### 2. Creating Network Scenarios with Scapy:
+Use Scapy to simulate network scenarios that can test the AI-generated P4 code, focusing on how well it handles security threats.
+
+#### 3. Reviewing PSA Examples:
+Analyze the PSA examples to see how complex switch configurations are handled and where AI tools might introduce vulnerabilities.
+
+#### 4. Benchmarking AI Tool Outputs: 
+Compare the outputs from AI coding assistants against the benchmarks established in the packet classification and TCP options parser sections.
+
+#### 5. Documenting Findings:
+As you progress through these steps, document your findings, especially noting any discrepancies or unique insights gained about the impact of AI coding assistants on P4 programming and network security.
+
+# P4-Guide Repositories
 
 ## Overview
 This document outlines how to use the jafingerhut/p4-guide GitHub resources for assessing the impact of coding assistants and generative AI tools on P4 programming and network security.
