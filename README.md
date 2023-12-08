@@ -52,6 +52,27 @@ This document outlines how to use the jafingerhut/p4-guide GitHub resources for 
 - **Purpose**: Explore data plane state manipulations.
 - **Method**: Assess how AI tools handle state changes in P4 programming.
 
+# Attack Scenarios for Testing
+
+## Overview
+This section outlines specific network attack scenarios to test AI-generated P4 code's robustness and security.
+
+### 1. DDoS Attacks
+- **Purpose**: Test handling of high-volume network traffic.
+- **Method**: Simulate a DDoS scenario and analyze the AI-generated P4 code's response.
+
+### 2. Packet Spoofing
+- **Purpose**: Evaluate effectiveness against spoofed packets.
+- **Method**: Create scenarios with spoofed packets and observe the AI-generated code's detection capabilities.
+
+### 3. Side-Channel Attacks
+- **Purpose**: Assess vulnerability to side-channel exploits.
+- **Method**: Test for variations in processing times or other side channels that could leak information.
+
+### 4. Zero-Day Vulnerabilities
+- **Purpose**: Examine response to unknown threats.
+- **Method**: Introduce new, uncommon network traffic and analyze the AI-generated P4 code's adaptability and security response.
+
 ## Additional Resources
 - **P4 Guide Repository**: [jafingerhut/p4-guide](https://github.com/jafingerhut/p4-guide)
 - **Scapy Documentation**: [Scapy Official Documentation](https://scapy.net/)
