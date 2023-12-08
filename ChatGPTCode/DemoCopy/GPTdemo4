@@ -1,0 +1,118 @@
+/*
+ * THIS CODE WAS GENERATED WITH CHAT GPT FOR THE PURPOSE OF THIS PROJECT
+ Generate p4 code that defines the packet processing pipeline for an IPv4 router, 
+ including parsing, forwarding decisions based on destination address, 
+ ECMP routing, MAC rewriting, and egress processing.
+ */
+
+
+/*
+Chat GPT's Response:
+Designing a complete P4 program for an IPv4 router involves multiple components and stages. 
+The following is a simplified example of a P4 program that outlines the basic packet processing pipeline for an IPv4 router. 
+Please note that this is a basic example, and in a real-world scenario, you would need to consider various optimizations, error handling, and security features.
+*/
+
+/* Define packet headers */
+header ethernet_t {
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
+}
+
+header ipv4_t {
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
+/* Define packet parser */
+parser MyParser(packet_in packet,
+                out headers hdr,
+                inout metadata meta,
+                inout standard_metadata_t standard_metadata) {
+    state start {
+        packet.extract(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4: parse_ipv4;
+            default: accept;
+        }
+    }
+
+    state parse_ipv4 {
+        packet.extract(hdr.ipv4);
+        transition accept;
+    }
+}
+
+/* Define metadata */
+metadata metadata_t {
+    bit<32> nextHop;
+    bit<48> egressPort;
+}
+
+/* Define control block */
+control MyIngress(inout headers hdr,
+                  inout metadata meta,
+                  inout standard_metadata_t standard_metadata) {
+    apply {
+        /* Forwarding decision based on destination address */
+        if (hdr.ipv4.dstAddr == 10.0.0.1) {
+            meta.nextHop = 192.168.1.1;
+            meta.egressPort = 1; /* Egress port for next hop */
+        } else if (hdr.ipv4.dstAddr == 10.0.0.2) {
+            meta.nextHop = 192.168.1.2;
+            meta.egressPort = 2; /* Egress port for next hop */
+        } else {
+            /* Implement ECMP routing or other forwarding logic as needed */
+            /* ... */
+        }
+
+        /* MAC rewriting */
+        hdr.ethernet.dstAddr = lookup_mac_table(meta.nextHop);
+
+        /* Egress processing */
+        apply_table(egressProcessingTable);
+    }
+}
+
+/* Define egress processing table */
+table egressProcessingTable {
+    key = {
+        meta.egressPort : exact;
+    }
+    actions = {
+        rewrite_mac;
+        /* Add other egress actions as needed */
+    }
+    size = 1024;
+}
+
+/* Define egress processing actions */
+action rewrite_mac {
+    modify_field(hdr.ethernet.srcAddr, 00:11:22:33:44:55);
+    modify_field(hdr.ethernet.dstAddr, 66:77:88:99:aa:bb);
+    /* Add other MAC rewriting actions as needed */
+}
+
+/* Define control block for egress processing */
+control MyEgress(inout headers hdr,
+                 inout metadata meta,
+                 inout standard_metadata_t standard_metadata) {
+    apply {
+        /* Apply egress processing actions based on the egress port */
+        apply_table(egressProcessingTable);
+    }
+}
+
+/* Instantiate parser, ingress, and egress controls */
+V1Switch(MyParser(), MyIngress(), MyEgress());

@@ -1,0 +1,119 @@
+/*
+ * THIS CODE WAS GENERATED WITH CHAT GPT FOR THE PURPOSE OF THIS PROJECT
+ The Prompt used: generate p4 code which outlines the behavior of a P4 switch, 
+ specifying how incoming packets are parsed, how forwarding decisions are made based on IPv4 information, 
+ how outgoing packets are processed, and how checksums are verified and computed. 
+ The switch is designed to handle IPv4 packets and make forwarding decisions based on various conditions.
+ */
+
+/*
+Chat GPT's Response:
+Creating a complete P4 program for a switch involves several components, 
+and it can be quite extensive. Below is a simplified example of a P4 program 
+that outlines the basic behavior of a switch for handling IPv4 packets. 
+This example assumes a simple switch with basic forwarding decisions based on the destination IPv4 address.
+*/
+
+/*
+ * Simple P4 program for a basic IPv4 switch.
+ */
+
+header ethernet_t {
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
+}
+
+header ipv4_t {
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
+parser parse_ethernet{
+    extract(ethernet_t);
+    switch (ethernet_t.etherType) {
+        0x0800: parse_ipv4;
+        default: ingress;
+    }
+}
+
+parser parse_ipv4 {
+    extract(ipv4_t);
+    transition select(ipv4_t.protocol) {
+        0x06: parse_tcp;
+        0x11: parse_udp;
+        default: drop;
+    }
+}
+
+parser parse_tcp {
+    // TCP parsing logic
+}
+
+parser parse_udp {
+    // UDP parsing logic
+}
+
+control ingress {
+    apply {
+        // Forwarding decision based on destination IPv4 address
+        if (ipv4_t.dstAddr == 32'hC0A80101) { // Example destination IPv4 address (192.168.1.1)
+            apply_table(forwarding_table);
+        } else {
+            apply_table(default_forwarding_table);
+        }
+    }
+}
+
+table forwarding_table {
+    reads {
+        ipv4_t.dstAddr: lpm;
+    }
+    actions {
+        forward;
+    }
+    size: 1024; // Adjust the size based on requirements
+}
+
+action forward {
+    // Forwarding logic
+}
+
+table default_forwarding_table {
+    actions {
+        drop;
+    }
+}
+
+control egress {
+    apply {
+        // Egress processing logic
+    }
+}
+
+checksum update_checksum16(bit<16> old_checksum, bit<16> old_value, bit<16> new_value) {
+    bit<32> tmp_sum = old_checksum + ~old_value + new_value;
+    bit<1> carry = tmp_sum[16];
+    return carry ? tmp_sum + 1 : tmp_sum;
+}
+
+checksum compute_ipv4_checksum(bit<96> hdr) {
+    bit<16> checksum = ones(16);
+    checksum = update_checksum16(checksum, 0w0, hdr[32:48]); // Source IP
+    checksum = update_checksum16(checksum, 0w0, hdr[48:64]); // Destination IP
+    checksum = update_checksum16(checksum, 0w0, hdr[0:16]);  // Version, IHL, DSCP, ECN
+    checksum = update_checksum16(checksum, hdr[16:32], hdr[64:80]); // Total Length, Identification
+    checksum = update_checksum16(checksum, hdr[80:96], 0w0); // Flags, Fragment Offset, TTL, Protocol
+
+    return ~checksum;
+}

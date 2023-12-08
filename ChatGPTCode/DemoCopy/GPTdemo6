@@ -1,0 +1,108 @@
+/*
+ * THIS CODE WAS GENERATED WITH CHAT GPT FOR THE PURPOSE OF THIS PROJECT
+ The Prompt used: Generate p4 code that outlines the behavior of a packet processing pipeline, 
+ handling Ethernet and IPv4 headers, updating metadata, performing lookups in tables based on destination addresses, 
+ and applying various actions on packets. It should also include counters for statistics gathering.
+ */
+
+/*
+Chat GPT's Response:
+Creating a complete P4 program requires a more in-depth understanding of the specific 
+requirements and environment in which the program will be executed. 
+However, I can provide you with a basic example of a P4 program that outlines the 
+behavior of a packet processing pipeline as described. Keep in mind that this is a simplified example, 
+and you may need to customize it based on your specific use case.
+*/
+
+// Define the packet header format for Ethernet
+header ethernet_t {
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
+}
+
+// Define the packet header format for IPv4
+header ipv4_t {
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffServ;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
+// Define metadata to store information across stages
+struct metadata_t {
+    bit<32> destinationPort;
+    // Add more metadata fields as needed
+}
+
+// Define a counter for statistics gathering
+counter packetCounter{
+    type : packets;
+    direct : 32w;
+}
+
+// Ingress processing pipeline
+parser parse_ethernet{
+    extract(ethernet_t);
+    return select(latest.etherType) {
+        0x0800 : parse_ipv4;
+        default : ingress;
+    }
+}
+
+parser parse_ipv4 {
+    extract(ipv4_t);
+    return ingress;
+}
+
+control ingress {
+    // Lookup tables for destination address-based actions
+    table ipv4_lookup {
+        reads {
+            ipv4_t.dstAddr : exact;
+        }
+        actions {
+            drop;
+            forward;
+        }
+        size : 1024;  // Adjust the size based on your requirements
+    }
+
+    apply {
+        // Call the IPv4 lookup table
+        ipv4_lookup.apply();
+
+        // Update metadata based on the lookup result
+        if (ipv4_lookup.hit) {
+            metadata.destinationPort = ipv4_lookup.action_params.port;
+        }
+
+        // Apply various actions based on conditions
+        if (ipv4_lookup.action == forward) {
+            // Forward the packet to the specified port
+            apply(port_forward);
+        } else {
+            // Drop the packet
+            apply(drop_packet);
+        }
+
+        // Update statistics counters
+        packetCounter.count(1);
+    }
+}
+
+control port_forward {
+    // Implement actions for forwarding the packet
+}
+
+control drop_packet {
+    // Implement actions for dropping the packet
+}
