@@ -3,7 +3,6 @@ from scapy.all import sendp, IP, TCP, Ether, RandIP, RandMAC
 import random
 import time
 import ipaddress
-import subprocess
 
 OUTPUT_FILES = 'output_files'
 
@@ -12,15 +11,6 @@ def ensure_output_directory(directory=OUTPUT_FILES):
     """Ensure that the output directory exists."""
     if not os.path.exists(directory):
         os.makedirs(directory)
-
-
-def start_tcpdump(iface, output_directory=OUTPUT_FILES):
-    """Start tcpdump on the specified interface and return the process handle."""
-    filename = f"{output_directory}/traffic_{iface}.pcap"
-    cmd = ["sudo", "tcpdump", "-i", iface, "-w", filename]
-    process = subprocess.Popen(cmd)
-    print(f"Started tcpdump on {iface}, saving to {filename}\n")
-    return process
 
 
 def generate_traffic(dst_subnet, dst_port, num_packets, iface, delay=0.1):
@@ -56,19 +46,7 @@ if __name__ == '__main__':
 
     ensure_output_directory()
 
-    tcpdump_processes = []
-    for iface in interfaces:
-        process = start_tcpdump(iface)
-        tcpdump_processes.append(process)
-
-    try:
-        for interface in interfaces:
-            for subnet in subnets:
-                print(f"Sending packets to subnet {subnet} via interface {interface}\n")
-                generate_traffic(subnet, destination_port, number_of_packets, interface, packet_delay)
-    finally:
-        # Terminate all tcpdump processes
-        for process in tcpdump_processes:
-            process.terminate()
-            process.wait()  # Wait for the process to terminate
-        print("All tcpdump processes have been terminated.")
+    for interface in interfaces:
+        for subnet in subnets:
+            print(f"Sending packets to subnet {subnet} via interface {interface}\n")
+            generate_traffic(subnet, destination_port, number_of_packets, interface, packet_delay)
