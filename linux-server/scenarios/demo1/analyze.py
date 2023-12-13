@@ -16,7 +16,8 @@ def analyze_pcap(file_path):
         for packet in cap:
             try:
                 # Check if the payload length is greater than the suspicious size
-                if 'TCP' in packet and int(packet.tcp.len) > SUSPICIOUS_PAYLOAD_SIZE:
+                payload_len = int(packet.tcp.len) if 'TCP' in packet and hasattr(packet.tcp, 'len') else 0
+                if payload_len > SUSPICIOUS_PAYLOAD_SIZE:
                     data.append({
                         'protocol': packet.transport_layer,
                         'src_addr': packet.ip.src,
