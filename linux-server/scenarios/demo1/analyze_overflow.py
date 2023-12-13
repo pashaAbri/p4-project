@@ -17,7 +17,7 @@ def analyze_pcap(file_path):
                 dst_addr = packet.ip.dst
                 src_port = packet[protocol].srcport
                 dst_port = packet[protocol].dstport
-                length = int(packet[protocol].length)
+                length = int(packet.length)
 
                 data.append({
                     'protocol': protocol,
