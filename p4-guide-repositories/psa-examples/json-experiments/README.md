@@ -17,7 +17,7 @@ Date:   Wed Mar 6 17:07:58 2019 -0800
 Compiling `v1model-demo.p4`:
 
 ```bash
-$ p4c --target bmv2 --arch v1model v1model-demo.p4
+$ p4c --target bmv2 --arch v1model v1model-demo2.p4
 ```
 
 Produced the file `v1model-demo.json` in this directory.  I have run
@@ -35,7 +35,7 @@ the hand-edits I made.
 When I try to run `simple_switch` using that, I get:
 
 ```bash
-$ simple_switch --log-console v1model-demo.hand-edited.json 
+$ simple_switch --log-console v1model-demo2.hand-edited.json 
 Calling target program-options parser
 Invalid reference to object of type 'header' with name 'ig'
 ```
