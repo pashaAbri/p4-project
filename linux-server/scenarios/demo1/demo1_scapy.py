@@ -19,7 +19,7 @@ def start_tcpdump(iface, output_directory=OUTPUT_FILES):
     filename = f"{output_directory}/traffic_{iface}.pcap"
     cmd = ["sudo", "tcpdump", "-i", iface, "-w", filename]
     subprocess.Popen(cmd)
-    print(f"Started tcpdump on {iface}, saving to {filename}")
+    print(f"Started tcpdump on {iface}, saving to {filename}\n")
 
 
 def generate_traffic(dst_subnet, dst_port, num_packets, iface, delay=0.1):
@@ -61,5 +61,5 @@ if __name__ == '__main__':
 
     for interface in interfaces:
         for subnet in subnets:
-            print(f"Sending packets to subnet {subnet} via interface {interface}")
+            print(f"Sending packets to subnet {subnet} via interface {interface}\n")
             generate_traffic(subnet, destination_port, number_of_packets, interface, packet_delay)
