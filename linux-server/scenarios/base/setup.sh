@@ -26,3 +26,6 @@ sudo ip link set veth4 mtu 9500
 sudo ip link set veth5 mtu 9500
 sudo sysctl net.ipv6.conf.veth4.disable_ipv6=1
 sudo sysctl net.ipv6.conf.veth5.disable_ipv6=1
+
+# can monitor ports using the following commands
+# sudo tcpdump -i veth5 -w ./output_files/traffic_veth5.pcap
