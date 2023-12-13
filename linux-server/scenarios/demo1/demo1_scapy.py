@@ -40,7 +40,7 @@ def generate_traffic(dst_subnet, dst_port, num_packets, iface, delay=0.1):
         packet = Ether(src=src_mac) / IP(dst=dst_ip, src=src_ip) / TCP(sport=src_port, dport=dst_port)
 
         # Sending the packet on specified interface
-        sendp(packet, iface=iface)
+        sendp(packet, iface=iface, verbose=False)
 
         # Delay between packet sends
         time.sleep(delay)
