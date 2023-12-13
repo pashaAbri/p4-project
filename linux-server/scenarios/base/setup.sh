@@ -32,6 +32,8 @@ p4c -b bmv2 base.p4 -o base.bmv2
 
 # start the software switch as a background process:
 sudo simple_switch --interface 0@veth0 --interface 1@veth2 --interface 2@veth4 base.bmv2/base.json &
+sleep 5
+echo -e "\n"
 
 # First pair: veth0-veth1
 sudo ip link add name veth0 type veth peer name veth1
