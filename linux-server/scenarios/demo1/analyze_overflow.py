@@ -42,10 +42,14 @@ def analyze_pcap(file_path):
 
 
 def mark_large_payloads(df, payload_size_threshold):
-    """Mark packets with payload sizes larger than the threshold."""
-    suspicious_packets = df[df['length'] > payload_size_threshold].copy()
-    suspicious_packets['suspicious'] = 'Yes'
-    return suspicious_packets
+    """Add a column to mark packets with payload sizes larger than the threshold as suspicious."""
+    # Create a new column initialized with 'No' for all rows
+    df['suspicious'] = 'No'
+
+    # Mark packets with large payload size as 'Yes' for suspicious
+    df.loc[df['length'] > payload_size_threshold, 'suspicious'] = 'Yes'
+
+    return df
 
 
 def save_dataframe_to_csv(df, filename):
@@ -66,10 +70,8 @@ if __name__ == "__main__":
         traffic_df = analyze_pcap(file_path)
 
         # Mark the suspicious packets
-        suspicious_df = mark_large_payloads(traffic_df, SUSPICIOUS_PAYLOAD_SIZE)
+        traffic_df = mark_large_payloads(traffic_df, SUSPICIOUS_PAYLOAD_SIZE)
 
         # Save the full traffic data and the suspicious packets separately
         traffic_csv_filename = os.path.splitext(file_path)[0] + '_traffic.csv'
-        suspicious_csv_filename = os.path.splitext(file_path)[0] + '_suspicious.csv'
         save_dataframe_to_csv(traffic_df, traffic_csv_filename)
-        save_dataframe_to_csv(suspicious_df, suspicious_csv_filename)
