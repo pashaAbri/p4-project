@@ -24,9 +24,9 @@ def generate_traffic(dst_subnet, dst_port, num_packets, iface, normal_payload_si
 
         # Decide whether to generate a normal packet or one that may cause overflow
         if random.random() < 0.5:  # 50% chance
-            payload = "A" * overflow_payload_size
+            payload = "A" * int(overflow_payload_size)
         else:
-            payload = "A" * normal_payload_size
+            payload = "A" * int(normal_payload_size)
 
         # Constructing the Ethernet and IP/TCP layers with Raw payload
         packet = Ether(src=src_mac) / IP(dst=dst_ip, src=src_ip) / TCP(sport=src_port, dport=dst_port) / Raw(load=payload)
