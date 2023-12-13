@@ -13,42 +13,36 @@ def ensure_output_directory(directory=OUTPUT_FILES):
         os.makedirs(directory)
 
 
-def generate_traffic(dst_subnet, dst_port, num_packets, iface, payload_size=100, delay=0.1):
+def generate_traffic(dst_subnet, dst_port, num_packets, iface, normal_payload_size=100, overflow_payload_size=1200, delay=0.1):
     dst_network = ipaddress.ip_network(dst_subnet)
 
     for _ in range(num_packets):
-        # Random source IP and MAC addresses for variation
         src_ip = RandIP()
         src_mac = RandMAC()
-
-        # Random destination IP within the subnet
         dst_ip = str(random.choice(list(dst_network.hosts())))
-
-        # Random source port
         src_port = random.randint(1024, 65535)
 
-        # Payload that might cause buffer overflow if improperly handled
-        # This is a string of 'A's of the specified payload size
-        payload = "A" * payload_size
+        # Decide whether to generate a normal packet or one that may cause overflow
+        if random.random() < 0.5:  # 50% chance
+            payload = "A" * overflow_payload_size
+        else:
+            payload = "A" * normal_payload_size
 
         # Constructing the Ethernet and IP/TCP layers with Raw payload
-        packet = Ether(src=src_mac) / IP(dst=dst_ip, src=src_ip) / TCP(sport=src_port, dport=dst_port) / Raw(
-            load=payload)
+        packet = Ether(src=src_mac) / IP(dst=dst_ip, src=src_ip) / TCP(sport=src_port, dport=dst_port) / Raw(load=payload)
 
-        # Sending the packet on specified interface
         sendp(packet, iface=iface, verbose=False)
 
-        # Delay between packet sends
         time.sleep(delay)
 
 
 if __name__ == '__main__':
     subnets = ["10.10.0.0/16", "11.11.0.0/16", "12.12.0.0/16", "20.20.20.0/24"]
     destination_port = 80  # Common port for testing
-    number_of_packets = 10  # Number of packets to send for each subnet
+    number_of_packets = 100  # Number of packets to send for each subnet
     interfaces = ["veth1", "veth3", "veth5"]  # List of veth interfaces
     packet_delay = 0.05  # Delay between packets
-    payload_size = 1200  # Size of the payload to test buffer overflow
+    payload_size = 1024  # Size of the payload to test buffer overflow
 
     ensure_output_directory()
 
