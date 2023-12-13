@@ -79,7 +79,7 @@ compiled P4 program into the running `simple_switch_grpc` process, and
 install table entries:
 
 ```bash
-cd p4-guide/demo1
+cd p4-guide/playground
 export PYTHONPATH="`realpath ../testlib`:$PYTHONPATH"
 python3
 ```
@@ -102,8 +102,8 @@ Enter these commands at the `>>> ` prompt of the Python session:
 
 my_dev1_addr='localhost:9559'
 my_dev1_id=0
-p4info_txt_fname='demo1.p4_16.p4info.txt'
-p4prog_binary_fname='demo1.p4_16.json'
+p4info_txt_fname='playground.p4_16.p4info.txt'
+p4prog_binary_fname='playground.p4_16.json'
 import p4runtime_sh.shell as sh
 
 sh.setup(device_id=my_dev1_id,

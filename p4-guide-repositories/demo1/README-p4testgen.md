@@ -13,7 +13,7 @@ This article describes how to:
 To generate a collection of at most 10 test cases:
 
 ```bash
-p4testgen --target bmv2 --arch v1model --max-tests 10 --out-dir out-p4testgen --test-backend ptf demo1.p4_16.p4
+p4testgen --target bmv2 --arch v1model --max-tests 10 --out-dir out-p4testgen --test-backend ptf playground.p4_16.p4
 ```
 
 To run the generated PTF tests:

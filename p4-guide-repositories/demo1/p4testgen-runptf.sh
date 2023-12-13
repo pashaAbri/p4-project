@@ -13,8 +13,8 @@ echo "P is: $P"
 set -x
 p4c --target bmv2 \
     --arch v1model \
-    --p4runtime-files demo1.p4_16.p4info.txt \
-    demo1.p4_16.p4
+    --p4runtime-files playground.p4_16.p4info.txt \
+    playground.p4_16.p4
 
 # Remove any log file written in an earlier run, otherwise
 # simple_switch_grpc will append the new log messages to the end of

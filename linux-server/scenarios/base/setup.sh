@@ -1,3 +1,11 @@
+# Compile the P4 program.
+# In the commands below, the -b option selects bmv2 (Behavioral Model Version 2) as the target,
+# which is the software switch that we will use to run the P4 program.
+p4c -b bmv2 base.p4 -o base.bmv2
+
+# start the software switch as a background process:
+sudo simple_switch --interface 0@veth0 --interface 1@veth2 --interface 2@veth4 base.bmv2/base.json &
+
 # First pair: veth0-veth1
 sudo ip link add name veth0 type veth peer name veth1
 sudo ip link set dev veth0 up
