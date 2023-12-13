@@ -50,7 +50,7 @@ def generate_traffic(dst_subnet, dst_port, num_packets, iface, delay=0.1):
 if __name__ == '__main__':
     subnets = ["10.10.0.0/16", "11.11.0.0/16", "12.12.0.0/16", "20.20.20.0/24"]
     destination_port = 80  # Common port for testing
-    number_of_packets = 100  # Number of packets to send for each subnet
+    number_of_packets = 10  # Number of packets to send for each subnet
     interfaces = ["veth1", "veth3", "veth5"]  # List of veth interfaces
     packet_delay = 0.05  # Delay between packets
 
