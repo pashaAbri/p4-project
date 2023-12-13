@@ -15,11 +15,12 @@ def ensure_output_directory(directory=OUTPUT_FILES):
 
 
 def start_tcpdump(iface, output_directory=OUTPUT_FILES):
-    """Start tcpdump on the specified interface."""
+    """Start tcpdump on the specified interface and return the process handle."""
     filename = f"{output_directory}/traffic_{iface}.pcap"
     cmd = ["sudo", "tcpdump", "-i", iface, "-w", filename]
-    subprocess.Popen(cmd)
+    process = subprocess.Popen(cmd)
     print(f"Started tcpdump on {iface}, saving to {filename}\n")
+    return process
 
 
 def generate_traffic(dst_subnet, dst_port, num_packets, iface, delay=0.1):
@@ -45,7 +46,7 @@ def generate_traffic(dst_subnet, dst_port, num_packets, iface, delay=0.1):
         # Delay between packet sends
         time.sleep(delay)
 
-# Example usage
+
 if __name__ == '__main__':
     subnets = ["10.10.0.0/16", "11.11.0.0/16", "12.12.0.0/16", "20.20.20.0/24"]
     destination_port = 80  # Common port for testing
@@ -55,11 +56,19 @@ if __name__ == '__main__':
 
     ensure_output_directory()
 
-    # Start tcpdump on interfaces
+    tcpdump_processes = []
     for iface in interfaces:
-        start_tcpdump(iface)
+        process = start_tcpdump(iface)
+        tcpdump_processes.append(process)
 
-    for interface in interfaces:
-        for subnet in subnets:
-            print(f"Sending packets to subnet {subnet} via interface {interface}\n")
-            generate_traffic(subnet, destination_port, number_of_packets, interface, packet_delay)
+    try:
+        for interface in interfaces:
+            for subnet in subnets:
+                print(f"Sending packets to subnet {subnet} via interface {interface}\n")
+                generate_traffic(subnet, destination_port, number_of_packets, interface, packet_delay)
+    finally:
+        # Terminate all tcpdump processes
+        for process in tcpdump_processes:
+            process.terminate()
+            process.wait()  # Wait for the process to terminate
+        print("All tcpdump processes have been terminated.")
