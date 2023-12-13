@@ -1,7 +1,26 @@
+import os
 from scapy.all import sendp, IP, TCP, Ether, RandIP, RandMAC
 import random
 import time
 import ipaddress
+import subprocess
+
+OUTPUT_FILES = 'output_files'
+
+
+def ensure_output_directory(directory=OUTPUT_FILES):
+    """Ensure that the output directory exists."""
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+def start_tcpdump(iface, output_directory=OUTPUT_FILES):
+    """Start tcpdump on the specified interface."""
+    filename = f"{output_directory}/traffic_{iface}.pcap"
+    cmd = ["sudo", "tcpdump", "-i", iface, "-w", filename]
+    subprocess.Popen(cmd)
+    print(f"Started tcpdump on {iface}, saving to {filename}")
+
 
 def generate_traffic(dst_subnet, dst_port, num_packets, iface, delay=0.1):
     dst_network = ipaddress.ip_network(dst_subnet)
@@ -33,6 +52,12 @@ if __name__ == '__main__':
     number_of_packets = 100  # Number of packets to send for each subnet
     interfaces = ["veth1", "veth3", "veth5"]  # List of veth interfaces
     packet_delay = 0.05  # Delay between packets
+
+    ensure_output_directory()
+
+    # Start tcpdump on interfaces
+    for iface in interfaces:
+        start_tcpdump(iface)
 
     for interface in interfaces:
         for subnet in subnets:
