@@ -33,5 +33,5 @@ def analyze_pcap(file_path):
 
 
 if __name__ == "__main__":
-    pcap_file = "path/to/your/pcap_file.pcap"  # Replace with your pcap file path
+    pcap_file = "./output_files/traffic_veth1.pcap"  # Replace with your pcap file path
     analyze_pcap(pcap_file)
