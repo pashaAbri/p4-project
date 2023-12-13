@@ -1,30 +1,9 @@
 /*
  * THIS CODE WAS GENERATED WITH CHAT GPT FOR THE PURPOSE OF THIS PROJECT
- The Prompt used: generate some P4 code that describes the packet processing pipeline for a network device, 
- including parsing, table lookups, actions, and controls. it should be a simplified representation 
- of how a network device should handle incoming and outgoing traffic, add in comments, and includes this information:
- header ethernet_t {
-    EthernetAddress dst_addr;
-    EthernetAddress src_addr;
-    bit<16>         ether_type;
-}
-
-header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdr_checksum;
-    IPv4Address src_addr;
-    IPv4Address dst_addr;
-}
+ * The Prompt used: generate some P4 code that describes the packet processing pipeline for a network device,
+ * including parsing, table lookups, actions, and controls. it should be a simplified representation
+ * of how a network device should handle incoming and outgoing traffic, add in comments, and includes this information:
  */
-
 
 #include <core.p4>
 #include <v1model.p4>
@@ -71,24 +50,18 @@ error {
     IPv4OptionsNotSupported
 }
 
-// Entry point of the parser
-parser start {
-    return my_parser;
-}
-
 // Custom parser for Ethernet and IPv4 headers
-parser my_parser(packet_in packet,
-                out headers_t hd,
-                inout metadata_t meta,
-                inout standard_metadata_t standard_meta)
-{
+control MyParser(packet_in packet,
+                 out headers_t hd,
+                 inout metadata_t meta,
+                 inout standard_metadata_t standard_meta) {
     state start {
         // Extract Ethernet header
         packet.extract(hd.ethernet);
         // Transition based on EtherType
         transition select(hd.ethernet.ether_type) {
             0x0800:  parse_ipv4; // If IPv4, go to IPv4 parsing
-            default: accept;      // Otherwise, accept the packet
+            default: accept;     // Otherwise, accept the packet
         }
     }
 
@@ -100,13 +73,12 @@ parser my_parser(packet_in packet,
         verify(hd.ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
         // Move to the accept state after successful parsing
         transition accept;
-    }    
+    }
 }
 
 // Custom deparser to emit Ethernet and IPv4 headers
 control my_deparser(packet_out packet,
-                   in headers_t hdr)
-{
+                    in headers_t hdr) {
     apply {
         // Emit Ethernet header
         packet.emit(hdr.ethernet);
@@ -117,23 +89,20 @@ control my_deparser(packet_out packet,
 
 // Placeholder for checksum verification
 control my_verify_checksum(inout headers_t hdr,
-                         inout metadata_t meta)
-{
+                           inout metadata_t meta) {
     apply { }
 }
 
 // Placeholder for checksum computation
 control my_compute_checksum(inout headers_t hdr,
-                          inout metadata_t meta)
-{
+                            inout metadata_t meta) {
     apply { }
 }
 
 // Ingress control for packet processing
 control my_ingress(inout headers_t hdr,
-                  inout metadata_t meta,
-                  inout standard_metadata_t standard_metadata)
-{
+                   inout metadata_t meta,
+                   inout standard_metadata_t standard_metadata) {
     bool dropped = false;
 
     action drop_action() {
@@ -171,14 +140,13 @@ control my_ingress(inout headers_t hdr,
 
 // Egress control for packet processing (placeholder)
 control my_egress(inout headers_t hdr,
-                 inout metadata_t meta,
-                 inout standard_metadata_t standard_metadata)
-{
+                  inout metadata_t meta,
+                  inout standard_metadata_t standard_metadata) {
     apply { }
 }
 
 // V1Switch declaration with main control components
-V1Switch(start,
+V1Switch(MyParser(),
          my_verify_checksum(),
          my_ingress(),
          my_egress(),
