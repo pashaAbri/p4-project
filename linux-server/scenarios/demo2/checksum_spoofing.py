@@ -40,7 +40,7 @@ def generate_checksum_spoof_traffic(dst_subnet, dst_port, num_packets, iface, no
 
 
 if __name__ == '__main__':
-    subnets = ["192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24"]  # Example subnets
+    subnets = ["10.10.0.0/16", "11.11.0.0/16", "12.12.0.0/16", "20.20.20.0/24"]
     destination_port = 80  # Common port for testing
     number_of_packets = 50  # Number of packets to send for each subnet
     interfaces = ["veth1", "veth3", "veth5"]  # List of veth interfaces
