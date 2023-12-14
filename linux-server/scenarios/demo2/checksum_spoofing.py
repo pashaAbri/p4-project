@@ -26,7 +26,7 @@ def generate_checksum_spoof_traffic(dst_subnet, dst_port, num_packets, iface, no
 
         # Decide whether to generate a normal packet or one that may cause overflow
         if random.random() < 0.5:  # 50% chance
-            payload = int(normal_payload_size) / 2
+            payload = int(normal_payload_size / 2)
             packet = Ether(src=src_mac) / IP(dst=dst_ip, src=src_ip, chksum=0x1234) / TCP(sport=src_port,
                                                                                           dport=dst_port) / Raw(
                 load=payload)
