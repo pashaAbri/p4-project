@@ -3,11 +3,9 @@ import pandas as pd
 import os
 
 
-def analyze_pcap(file_path, normal_payload_size):
+def analyze_pcap(file_path, spoofed_payload_size):
     cap = pyshark.FileCapture(file_path, only_summaries=False)
     cap.set_debug(True)
-
-    spoofed_payload_size = int(normal_payload_size / 2)
 
     data = []
 
@@ -51,7 +49,7 @@ def save_dataframe_to_csv(df, filename):
 
 
 if __name__ == "__main__":
-    NORMAL_PAYLOAD_SIZE = 1024
+    SPOOFED_PAYLOAD_SIZE = 1024
     pcap_files = [
         "./output_files/traffic_veth1.pcap",
         "./output_files/traffic_veth3.pcap",
@@ -60,6 +58,6 @@ if __name__ == "__main__":
 
     for file_path in pcap_files:
         print(f"Analyzing {file_path}...")
-        traffic_df = analyze_pcap(file_path, NORMAL_PAYLOAD_SIZE)
+        traffic_df = analyze_pcap(file_path, SPOOFED_PAYLOAD_SIZE)
         traffic_csv_filename = os.path.splitext(file_path)[0] + '_traffic.csv'
         save_dataframe_to_csv(traffic_df, traffic_csv_filename)
