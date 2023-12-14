@@ -49,7 +49,7 @@ def save_dataframe_to_csv(df, filename):
 
 
 if __name__ == "__main__":
-    SPOOFED_PAYLOAD_SIZE = 1024
+    SPOOFED_PAYLOAD_SIZE = 566
     pcap_files = [
         "./output_files/traffic_veth1.pcap",
         "./output_files/traffic_veth3.pcap",
