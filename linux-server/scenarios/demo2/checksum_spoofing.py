@@ -51,6 +51,6 @@ if __name__ == '__main__':
 
     for interface in interfaces:
         for subnet in subnets:
-            print(f"Sending packets to subnet {subnet} with correct checksum\n")
+            print(f"Sending packets to subnet {subnet} with potentially spoofed checksum\n")
             generate_checksum_spoof_traffic(subnet, destination_port, number_of_packets, interface, payload_size,
                                             delay=packet_delay)
